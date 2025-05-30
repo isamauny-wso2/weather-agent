@@ -1,8 +1,8 @@
 import ballerinax/ai;
 
-final ai:OpenAiProvider _WeatherRecommendationModel = check new (OpenAIKey, ai:GPT_4O_MINI);
+final ai:OpenAiProvider _WeatherRecommendationModel = check new (OpenAIKey, ai:GPT_4O);
 final ai:Agent _WeatherRecommendationAgent = check new (
-    systemPrompt = {role: "Music recommendations assistant", instructions: string `You are a friendly companion recommending playlists depending on the weather forecast in the city the user lives in. You can fetch weather data and suggest appropriate playlists based on the conditions.`},
+    systemPrompt = {role: AGENT_ROLE, instructions: AGENT_INSTRUCTIONS},
     memory = new ai:MessageWindowChatMemory(200),
     model = _WeatherRecommendationModel,
     tools = [weatherforecast, getPlaylistSuggestions]
@@ -13,9 +13,9 @@ final ai:Agent _WeatherRecommendationAgent = check new (
 # + longitude - Longitude of the location
 # + return - Weather information or error
 @ai:AgentTool
-@display {label: "", iconPath: "https://bcentral-packageicons.azureedge.net/images/ballerina_http_2.14.0.png"}
+@display {label: "weatherAgent", iconPath: "https://bcentral-packageicons.azureedge.net/images/ballerina_http_2.14.0.png"}
 isolated function weatherforecast(decimal latitude = defaultLatitude, decimal longitude = defaultLongitude) returns json|error {
-    string path = string `/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${weatherApiKey}`;
+    string path = string `${WEATHER_ENDPOINT}?${LAT_PARAM}=${latitude}&${LON_PARAM}=${longitude}&${APP_ID_PARAM}=${weatherApiKey}`;
     json weatherInformation = check WeatherClient->get(path);
     return weatherInformation;
 }

@@ -1,67 +1,125 @@
+import ballerina/http;
+import ballerina/log;
 import ballerina/mime;
 
-isolated function getSpotifyToken() returns string|error {
-    string encodedCredentials = spotifyClientId + ":" + spotifyClientSecret;
-    map<string> formData = {
-        "grant_type": "client_credentials"
-    };
-
-    SpotifyToken tokenResponse = check SpotifyAuthClient->post("",
-        formData,
-        {
-            [mime:CONTENT_TYPE]: mime:APPLICATION_FORM_URLENCODED,
-            "Authorization": string `Basic ${encodedCredentials}`
-        }
+# Get OAuth2 token using client credentials grant type
+# + tokenEndpoint - The token endpoint base URL
+# + context - URL context , such as /api/token
+# + clientId - Client ID
+# + clientSecret - Client Secret
+# + return - Access token string or error
+isolated function getOAuth2Token(string tokenEndpoint, string context, string clientId, string clientSecret) returns string|error {
+    final http:Client tokenClient = check new (tokenEndpoint,
+        timeout = 60
     );
-    return tokenResponse.access_token;
+
+    // Prepare Basic Auth header (standard for client credentials)
+    string credentials = clientId + ":" + clientSecret;
+    string encodedCredentials = credentials.toBytes().toBase64();
+
+    // Form request 
+    http:Request request = new;
+    // Set form data
+    request.setTextPayload("grant_type=client_credentials");
+    // Set headers
+    request.setHeader("Authorization", "Basic " + encodedCredentials);
+    request.setHeader("Content-Type", mime:APPLICATION_FORM_URLENCODED);
+    request.setHeader("Accept", mime:APPLICATION_JSON);
+
+    TokenResponse|http:ClientError tokenResponse;
+    do {
+        log:printInfo("Calling OAuth Endpoint");
+        tokenResponse = tokenClient->post(context,
+        request
+        );
+    }
+    if tokenResponse is TokenResponse {
+        log:printInfo("Token Received: " + tokenResponse.access_token);
+        return tokenResponse.access_token;
+    } else {
+        // Bubble up error to calling level
+        return tokenResponse;
+    }
+
+}
+
+isolated function getAIGWToken() returns string {
+    string|error token = getOAuth2Token(AIGW_AUTH_BASE_URL, "/oauth2/token", openAIClientId, openAPIClientSecret);
+
+    // Trick so that I can use this function straight for the AI Agent editor
+    if (token is string) {
+        return token;
+    }
+    else {
+        return "TOKEN_ERROR";
+    }
+}
+
+isolated function getSpotifyToken() returns string|error {
+    return getOAuth2Token(SPOTIFY_AUTH_BASE_URL, "/api/token", spotifyClientId, spotifyClientSecret);
 }
 
 isolated function searchPlaylists(string query) returns Playlist[]|error {
     string token = check getSpotifyToken();
-    string path = string `/search?q=${query}&type=playlist&limit=5`;
+    log:printInfo("Using Spotify Token: " + token);
+    string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=5`;
 
-    PlaylistSearchResponse response = check SpotifyClient->get(path,
+    // check spotifyClient->get(string `/search?q=${musicMood}&type=playlist`);
+
+    PlaylistSearchResponse |http:ClientError response = spotifyClient->get(path,
         headers = {
-            "Authorization": string `Bearer ${token}`
-        }
+        "Authorization": string `Bearer ${token}`
+    }
     );
-    return response.playlists.items;
+
+    if (response is PlaylistSearchResponse) {
+        log:printInfo("Number of items: " + response.playlists.items.count().toString());
+        return response.playlists.items;
+    }
+    else {
+        log:printInfo("Error occurred connecting to Spotify");
+        log:printInfo(response.toString());
+        return response;
+    }
 }
 
 isolated function getMusicMoodForWeather(int weatherCode) returns string {
     match weatherCode {
         1000 => {
-            return "Upbeat";
+            return MOOD_UPBEAT;
         }
         1003|1006 => {
-            return "Chill";
+            return MOOD_CHILL;
         }
         1009 => {
-            return "Alternative";
+            return MOOD_ALTERNATIVE;
         }
         1030|1135|1147 => {
-            return "Ambient";
+            return MOOD_AMBIENT;
         }
         1063|1150|1153|1180|1183|1240 => {
-            return "Calm";
+            return MOOD_CALM;
         }
         1087|1273|1276 => {
-            return "Epic";
+            return MOOD_EPIC;
         }
         1066|1210|1213|1216|1219|1255 => {
-            return "Dreamy";
+            return MOOD_DREAMY;
         }
         1114|1117 => {
-            return "Dark";
+            return MOOD_DARK;
         }
         1168|1171|1198|1201 => {
-            return "Classical";
+            return MOOD_CLASSICAL;
         }
         1192|1195|1243|1246 => {
-            return "Melancholic";
+            return MOOD_MELANCHOLIC;
+        }
+        801 => {
+            return MOOD_CLASSICAL;
         }
         _ => {
-            return "Pop";
+            return MOOD_POP;
         }
     }
 }
