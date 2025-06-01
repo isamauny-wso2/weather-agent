@@ -24,7 +24,7 @@ isolated function weatherforecast(decimal latitude = defaultLatitude, decimal lo
 # + weatherCode - Weather condition code
 # + return - List of recommended playlists or error
 @ai:AgentTool
-isolated function getPlaylistSuggestions(int weatherCode) returns Playlist[]|error {
+isolated function getPlaylistSuggestions(int weatherCode) returns ItemsItem?[]|error {
     string musicMood = getMusicMoodForWeather(weatherCode);
     return searchPlaylists(musicMood);
 }

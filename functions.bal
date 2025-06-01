@@ -43,7 +43,7 @@ isolated function getOAuth2Token(string tokenEndpoint, string context, string cl
 
 }
 
-isolated function getAIGWToken() returns string {
+isolated function getAIGWToken() returns string? {
     string|error token = getOAuth2Token(AIGW_AUTH_BASE_URL, "/oauth2/token", openAIClientId, openAPIClientSecret);
 
     // Trick so that I can use this function straight for the AI Agent editor
@@ -51,28 +51,25 @@ isolated function getAIGWToken() returns string {
         return token;
     }
     else {
-        return "TOKEN_ERROR";
+        return ();
     }
 }
 
-isolated function getSpotifyToken() returns string|error {
-    return getOAuth2Token(SPOTIFY_AUTH_BASE_URL, "/api/token", spotifyClientId, spotifyClientSecret);
-}
+// isolated function getSpotifyToken() returns string|error {
+//     log:printInfo("Retrieving Spotify token");
+//     return getOAuth2Token(SPOTIFY_AUTH_BASE_URL, "/api/token", spotifyClientId, spotifyClientSecret);
+// }
 
-isolated function searchPlaylists(string query) returns Playlist[]|error {
-    string token = check getSpotifyToken();
-    log:printInfo("Using Spotify Token: " + token);
+isolated function searchPlaylists(string query) returns ItemsItem?[] | error {
+    //string token = check getSpotifyToken();
+    //log:printInfo("Using Spotify Token: " + token);
     string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=5`;
 
     // check spotifyClient->get(string `/search?q=${musicMood}&type=playlist`);
 
-    PlaylistSearchResponse |http:ClientError response = spotifyClient->get(path,
-        headers = {
-        "Authorization": string `Bearer ${token}`
-    }
-    );
+    SpotifyPlayList |http:ClientError response = spotifyClient->get(path);
 
-    if (response is PlaylistSearchResponse) {
+    if (response is SpotifyPlayList) {
         log:printInfo("Number of items: " + response.playlists.items.count().toString());
         return response.playlists.items;
     }
@@ -84,6 +81,7 @@ isolated function searchPlaylists(string query) returns Playlist[]|error {
 }
 
 isolated function getMusicMoodForWeather(int weatherCode) returns string {
+    log:printInfo("Retrieving mood...");
     match weatherCode {
         1000 => {
             return MOOD_UPBEAT;
