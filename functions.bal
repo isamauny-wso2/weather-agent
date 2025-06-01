@@ -34,7 +34,7 @@ isolated function getOAuth2Token(string tokenEndpoint, string context, string cl
         );
     }
     if tokenResponse is TokenResponse {
-        log:printInfo("Token Received: " + tokenResponse.access_token);
+        log:printDebug("Token Received: " + tokenResponse.access_token.substring(1, 10));
         return tokenResponse.access_token;
     } else {
         // Bubble up error to calling level
@@ -70,12 +70,12 @@ isolated function searchPlaylists(string query) returns ItemsItem?[]|error {
     SpotifyPlayList|http:ClientError response = spotifyClient->get(path);
 
     if (response is SpotifyPlayList) {
-        log:printInfo("Number of items: " + response.playlists.items.length().toString());
+        log:printDebug("Number of items: " + response.playlists.items.length().toString());
         return response.playlists.items;
     }
     else {
-        log:printInfo("Error occurred connecting to Spotify");
-        log:printInfo(response.toString());
+        log:printDebug("Error occurred connecting to Spotify");
+        log:printDebug(response.toString());
         return response;
     }
 }

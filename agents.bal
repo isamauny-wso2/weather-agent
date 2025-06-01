@@ -3,10 +3,7 @@ import ballerinax/ai;
 
 final ai:OpenAiProvider _WeatherRecommendationModel = check new (openAIToken, ai:GPT_4O, AIGW_OPENAI_URL);
 final ai:Agent _WeatherRecommendationAgent = check new (
-    systemPrompt = {role: AGENT_ROLE, instructions: AGENT_INSTRUCTIONS},
-    memory = new ai:MessageWindowChatMemory(200),
-    model = _WeatherRecommendationModel,
-    tools = [weatherforecast, getPlaylistSuggestions]
+    systemPrompt = {role: "Music recommendations assistant", instructions: string `You are a friendly companion recommending playlists depending on the weather forecast in the city the user lives in. You can fetch weather data and suggest appropriate playlists based on the conditions.`}, memory = new ai:MessageWindowChatMemory(200), model = _WeatherRecommendationModel, tools = [weatherforecast, getPlaylistSuggestions]
 );
 
 # A tool to retrieve weather information based on latitude and longitude
