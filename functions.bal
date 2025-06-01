@@ -43,7 +43,7 @@ isolated function getOAuth2Token(string tokenEndpoint, string context, string cl
 
 }
 
-isolated function getAIGWToken() returns string? {
+isolated function getAIGWToken() returns string {
     string|error token = getOAuth2Token(AIGW_AUTH_BASE_URL, "/oauth2/token", openAIClientId, openAPIClientSecret);
 
     // Trick so that I can use this function straight for the AI Agent editor
@@ -51,7 +51,7 @@ isolated function getAIGWToken() returns string? {
         return token;
     }
     else {
-        return ();
+        return "TOKEN_ERROR";
     }
 }
 
@@ -60,17 +60,17 @@ isolated function getAIGWToken() returns string? {
 //     return getOAuth2Token(SPOTIFY_AUTH_BASE_URL, "/api/token", spotifyClientId, spotifyClientSecret);
 // }
 
-isolated function searchPlaylists(string query) returns ItemsItem?[] | error {
+isolated function searchPlaylists(string query) returns ItemsItem?[]|error {
     //string token = check getSpotifyToken();
     //log:printInfo("Using Spotify Token: " + token);
-    string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=5`;
+    string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=10`;
 
     // check spotifyClient->get(string `/search?q=${musicMood}&type=playlist`);
 
-    SpotifyPlayList |http:ClientError response = spotifyClient->get(path);
+    SpotifyPlayList|http:ClientError response = spotifyClient->get(path);
 
     if (response is SpotifyPlayList) {
-        log:printInfo("Number of items: " + response.playlists.items.count().toString());
+        log:printInfo("Number of items: " + response.playlists.items.length().toString());
         return response.playlists.items;
     }
     else {
@@ -113,7 +113,7 @@ isolated function getMusicMoodForWeather(int weatherCode) returns string {
         1192|1195|1243|1246 => {
             return MOOD_MELANCHOLIC;
         }
-        801 => {
+        801 | 803 | 805 => {
             return MOOD_CLASSICAL;
         }
         _ => {
