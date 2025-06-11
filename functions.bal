@@ -34,7 +34,7 @@ isolated function getOAuth2Token(string tokenEndpoint, string context, string cl
         );
     }
     if tokenResponse is TokenResponse {
-        log:printDebug("Token Received: " + tokenResponse.access_token.substring(1, 10));
+        log:printInfo("Token Received: " + tokenResponse.access_token.substring(0, 10));
         return tokenResponse.access_token;
     } else {
         // Bubble up error to calling level
@@ -63,7 +63,7 @@ isolated function getAIGWToken() returns string {
 isolated function searchPlaylists(string query) returns ItemsItem?[]|error {
     //string token = check getSpotifyToken();
     //log:printInfo("Using Spotify Token: " + token);
-    string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=10`;
+    string path = string `${SPOTIFY_SEARCH_ENDPOINT}?q=${query}&type=playlist&limit=3`;
 
     // check spotifyClient->get(string `/search?q=${musicMood}&type=playlist`);
 
@@ -83,7 +83,7 @@ isolated function searchPlaylists(string query) returns ItemsItem?[]|error {
 isolated function getMusicMoodForWeather(int weatherCode) returns string {
     log:printInfo("Retrieving mood...");
     match weatherCode {
-        1000 => {
+        800|1000 => {
             return MOOD_UPBEAT;
         }
         1003|1006 => {
@@ -113,7 +113,7 @@ isolated function getMusicMoodForWeather(int weatherCode) returns string {
         1192|1195|1243|1246 => {
             return MOOD_MELANCHOLIC;
         }
-        801 | 803 | 805 => {
+        801|803|805 => {
             return MOOD_CLASSICAL;
         }
         _ => {

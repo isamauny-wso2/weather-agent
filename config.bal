@@ -7,4 +7,3 @@ configurable string openAIClientId = ?;
 configurable string openAIClientSecret = ?;
 configurable string sonnetKey = ?;
 configurable string OpenAIKey = ?;
-configurable string devToken = ?;
