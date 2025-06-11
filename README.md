@@ -87,4 +87,4 @@ The system includes comprehensive error handling for:
 
 ## License
 
-[Add your license information here]
+Apache 2.0
