@@ -46,7 +46,7 @@ isolated function getOAuth2Token(string tokenEndpoint, string context, string cl
 isolated function getAIGWToken() returns string {
     string|error token = getOAuth2Token(AIGW_AUTH_BASE_URL, "/oauth2/token", openAIClientId, openAIClientSecret);
 
-    // Trick so that I can use this function straight for the AI Agent editor
+    // Trick so that I can use this function straight from the AI Agent editor
     if (token is string) {
         return token;
     }

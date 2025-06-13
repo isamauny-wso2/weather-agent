@@ -1,6 +1,8 @@
 # Weather-Based Music Recommendation Agent
 
-An AI-powered music recommendation system that suggests Spotify playlists based on weather conditions. The system integrates OpenAI for intelligent recommendations, OpenWeatherMap API for weather data, and Spotify API for music playlists.
+An AI-powered music recommendation agent that suggests Spotify playlists based on weather conditions. The system integrates OpenAI for intelligent recommendations, OpenWeatherMap API for weather data, and Spotify API for music playlists.
+
+This example is using the WSO2 API Manager AI GW to manage the OpenAI connection. 
 
 ## Features
 
@@ -29,8 +31,6 @@ spotifyClientId = "<your-spotify-client-id>"
 spotifyClientSecret = "<your-spotify-client-secret>"
 openAIClientId = "<your-openai-client-id>"
 openAIClientSecret = "<your-openai-client-secret>"
-sonnetKey = "<your-sonnet-key>"
-OpenAIKey = "<your-openai-key>"
 ```
 
 ## Project Structure

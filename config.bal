@@ -5,5 +5,5 @@ configurable string spotifyClientId = ?;
 configurable string spotifyClientSecret = ?;
 configurable string openAIClientId = ?;
 configurable string openAIClientSecret = ?;
-configurable string sonnetKey = ?;
-configurable string OpenAIKey = ?;
+// Not used as we go through the AI GW, which manages this key for us.
+// configurable string OpenAIKey = ?;
